@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TONTONANKU — Katalog Anime & Donghua</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0E14;
+    --panel:#13172238;
+    --panel-solid:#151A28;
+    --line:#252B3D;
+    --text:#EDEAE0;
+    --muted:#8B91A8;
+    --amber:#FF6B35;   /* aksen ANIME */
+    --jade:#2DD4BF;    /* aksen DONGHUA */
+    --gold:#E8B45A;
+
+    --display:'Anton', sans-serif;
+    --body:'Plus Jakarta Sans', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--body);
+    overflow-x:hidden;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  ::selection{background:var(--amber); color:#0B0E14;}
+
+  /* ---------- NAVBAR ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px clamp(16px,5vw,48px);
+    background:linear-gradient(to bottom, rgba(11,14,20,0.95), rgba(11,14,20,0));
+    backdrop-filter:blur(2px);
+  }
+  .logo{
+    font-family:var(--display);
+    font-size:22px;
+    letter-spacing:0.5px;
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .logo span{color:var(--amber);}
+  nav{display:flex; gap:28px; font-size:14px; font-weight:600;}
+  nav a{
+    color:var(--muted);
+    position:relative;
+    padding-bottom:4px;
+    transition:color .2s;
+  }
+  nav a:hover{color:var(--text);}
+  nav a:focus-visible{outline:2px solid var(--gold); outline-offset:4px; border-radius:2px;}
+
+  /* ---------- HERO / BANNER ---------- */
+  .hero{
+    position:relative;
+    height:min(86vh, 640px);
+    min-height:420px;
+    overflow:hidden;
+  }
+  .slides{
+    display:flex;
+    height:100%;
+    transition:transform .55s cubic-bezier(.65,0,.35,1);
+    touch-action: pan-y;
+  }
+  .slide{
+    position:relative;
+    flex:0 0 100%;
+    height:100%;
+    display:flex;
+    align-items:flex-end;
+    padding:clamp(28px,6vw,72px);
+    user-select:none;
+  }
+  .slide .bg{
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+  }
+  .slide .scrim{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(to top, var(--ink) 5%, rgba(11,14,20,.15) 55%, rgba(11,14,20,.55) 100%),
+      linear-gradient(to right, rgba(11,14,20,.65) 0%, rgba(11,14,20,0) 55%);
+  }
+  .slide-content{position:relative; z-index:2; max-width:640px;}
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:2px;
+    padding:5px 10px;
+    border:1px solid currentColor;
+    border-radius:3px;
+    display:inline-block;
+    margin-bottom:14px;
+  }
+  .kicker.k-anime{color:var(--amber);}
+  .kicker.k-donghua{color:var(--jade);}
+  .slide-title{
+    font-family:var(--display);
+    font-size:clamp(32px,6vw,58px);
+    line-height:1.02;
+    text-transform:uppercase;
+    margin-bottom:14px;
+    text-shadow:0 4px 24px rgba(0,0,0,.4);
+  }
+  .slide-meta{
+    display:flex; align-items:center; gap:14px;
+    font-family:var(--mono); font-size:13px; color:var(--muted);
+  }
+  .ep-badge{
+    font-family:var(--mono);
+    font-size:13px; font-weight:700;
+    padding:5px 12px; border-radius:20px;
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--line);
+  }
+  .ep-badge .dot{width:6px; height:6px; border-radius:50%; background:var(--jade); animation:pulse 1.6s infinite;}
+  .ep-badge.end .dot{background:var(--muted); animation:none;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  .hero-arrow{
+    position:absolute; top:50%; transform:translateY(-50%);
+    z-index:3; width:42px; height:42px; border-radius:50%;
+    background:rgba(11,14,20,.55); border:1px solid var(--line);
+    color:var(--text); font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background .2s, transform .2s;
+  }
+  .hero-arrow:hover{background:rgba(11,14,20,.85); transform:translateY(-50%) scale(1.06);}
+  .hero-arrow.prev{left:18px;}
+  .hero-arrow.next{right:18px;}
+
+  .hero-dots{
+    position:absolute; bottom:18px; right:clamp(16px,5vw,48px); z-index:3;
+    display:flex; gap:8px;
+  }
+  .hero-dots button{
+    width:26px; height:4px; border-radius:2px; border:none;
+    background:rgba(255,255,255,.25); cursor:pointer; transition:background .2s, width .2s;
+  }
+  .hero-dots button.active{background:var(--gold); width:38px;}
+
+  /* ---------- SECTIONS ---------- */
+  main{padding:48px clamp(16px,5vw,48px) 80px;}
+  .section{margin-bottom:56px;}
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .section-title{
+    font-family:var(--display);
+    font-size:clamp(22px,3vw,30px);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .section-title .bar{width:6px; height:24px; border-radius:2px;}
+  .section-title.donghua .bar{background:var(--jade);}
+  .section-title.anime .bar{background:var(--amber);}
+  .section-sub{font-family:var(--mono); font-size:12px; color:var(--muted);}
+
+  .row-wrap{position:relative;}
+  .row{
+    display:flex; gap:18px;
+    overflow-x:auto;
+    scroll-snap-type:x proximity;
+    padding-bottom:8px;
+    scrollbar-width:none;
+  }
+  .row::-webkit-scrollbar{display:none;}
+
+  .row-nav{
+    position:absolute; top:38%; transform:translateY(-50%);
+    width:36px; height:36px; border-radius:50%;
+    background:var(--panel-solid); border:1px solid var(--line);
+    color:var(--text); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:2; opacity:.85; transition:opacity .2s;
+  }
+  .row-nav:hover{opacity:1;}
+  .row-nav.left{left:-14px;}
+  .row-nav.right{right:-14px;}
+
+  .card{
+    flex:0 0 180px;
+    scroll-snap-align:start;
+    cursor:pointer;
+  }
+  .card:focus-visible .poster{outline:2px solid var(--gold); outline-offset:2px;}
+  .poster{
+    position:relative;
+    width:180px; height:252px;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .25s, border-color .25s;
+  }
+  .card:hover .poster{transform:translateY(-6px); border-color:var(--gold);}
+  .poster-glyph{
+    font-family:var(--display);
+    font-size:42px;
+    color:rgba(255,255,255,.35);
+    text-transform:uppercase;
+  }
+  .poster-status{
+    position:absolute; top:8px; left:8px;
+    font-family:var(--mono); font-size:10px; font-weight:700;
+    padding:3px 8px; border-radius:12px;
+    background:rgba(11,14,20,.65); backdrop-filter:blur(2px);
+    display:flex; align-items:center; gap:5px;
+  }
+  .poster-status .dot{width:5px; height:5px; border-radius:50%; background:var(--jade); animation:pulse 1.6s infinite;}
+  .poster-status.end .dot{background:var(--muted); animation:none;}
+
+  .card-title{
+    margin-top:10px; font-size:14px; font-weight:700;
+    line-height:1.3;
+  }
+  .card-eps{
+    margin-top:3px; font-family:var(--mono); font-size:11px; color:var(--muted);
+  }
+
+  /* --- placeholder gradient generator: ganti dengan poster asli (lihat komentar di JS) --- */
+  .pg-0{background:linear-gradient(150deg,#1f2440,#3a2a55);}
+  .pg-1{background:linear-gradient(150deg,#16363a,#1f5c52);}
+  .pg-2{background:linear-gradient(150deg,#3a1f1f,#6e3326);}
+  .pg-3{background:linear-gradient(150deg,#2a1f3a,#5a2a55);}
+  .pg-4{background:linear-gradient(150deg,#1f3a2e,#246e4f);}
+  .pg-5{background:linear-gradient(150deg,#3a2a1f,#6e5226);}
+
+  /* ---------- SEARCH ---------- */
+  .search-wrap{
+    position:relative;
+    margin-bottom:40px;
+    max-width:480px;
+  }
+  .search-wrap svg{
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    width:16px; height:16px; color:var(--muted); pointer-events:none;
+  }
+  #searchInput{
+    width:100%;
+    background:var(--panel-solid);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 40px 13px 38px;
+    color:var(--text);
+    font-family:var(--body);
+    font-size:14px;
+  }
+  #searchInput::placeholder{color:var(--muted);}
+  #searchInput:focus{outline:none; border-color:var(--gold);}
+  #searchClear{
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    width:26px; height:26px; border-radius:50%; border:none;
+    background:transparent; color:var(--muted); font-size:16px;
+    cursor:pointer; display:none; align-items:center; justify-content:center;
+  }
+  #searchClear.show{display:flex;}
+  #searchClear:hover{color:var(--text);}
+
+  .empty-state{
+    display:none;
+    font-family:var(--mono); font-size:13px; color:var(--muted);
+    padding:18px 0;
+  }
+
+  /* ---------- DETAIL MODAL ---------- */
+  .detail-overlay{
+    position:fixed; inset:0; z-index:300;
+    background:rgba(5,6,10,.7);
+    display:none; align-items:flex-end; justify-content:center;
+    opacity:0; transition:opacity .25s;
+  }
+  .detail-overlay.open{display:flex; opacity:1;}
+  .detail-sheet{
+    width:100%; max-width:720px; max-height:92vh;
+    background:var(--ink);
+    border-radius:18px 18px 0 0;
+    overflow-y:auto;
+    transform:translateY(40px);
+    transition:transform .35s cubic-bezier(.32,.72,0,1);
+    border:1px solid var(--line); border-bottom:none;
+  }
+  .detail-overlay.open .detail-sheet{transform:translateY(0);}
+  .detail-banner{
+    position:relative; width:100%; height:min(48vh,300px);
+    background-size:cover; background-position:center;
+    border-radius:18px 18px 0 0;
+  }
+  .detail-banner-scrim{
+    position:absolute; inset:0; border-radius:18px 18px 0 0;
+    background:linear-gradient(to top, var(--ink) 2%, rgba(11,14,20,.05) 60%);
+  }
+  .detail-glyph{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-size:64px; color:rgba(255,255,255,.25);
+  }
+  .detail-back{
+    position:absolute; top:16px; left:16px; z-index:2;
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(11,14,20,.6); border:1px solid var(--line);
+    color:var(--text); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px;
+  }
+  .detail-back:hover{background:rgba(11,14,20,.9);}
+  .detail-schedule{
+    position:absolute; left:22px; bottom:16px; z-index:2;
+    display:flex; align-items:center; gap:7px;
+    font-family:var(--body); font-weight:700; font-style:italic; font-size:14px;
+  }
+  .detail-schedule svg{width:18px; height:18px;}
+  .detail-schedule.ongoing{color:var(--gold);}
+  .detail-schedule.tamat{color:var(--muted);}
+  .detail-body{padding:22px clamp(18px,4vw,28px) 44px;}
+  .detail-title{
+    font-family:var(--display); font-size:clamp(24px,4vw,32px);
+    text-transform:none; line-height:1.15; margin-bottom:18px;
+  }
+  .detail-genres{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:26px;}
+  .genre-chip{
+    flex:0 0 auto; font-size:13px; font-weight:600;
+    padding:7px 16px; border-radius:20px;
+    border:1px solid var(--amber); color:var(--amber);
+    white-space:nowrap;
+  }
+  .genre-chip.donghua{border-color:var(--jade); color:var(--jade);}
+  .detail-sinopsis-label{
+    font-family:var(--display); font-size:18px; text-transform:uppercase;
+    margin-bottom:10px; letter-spacing:1px;
+  }
+  .detail-sinopsis{font-size:14.5px; line-height:1.75; color:var(--text); opacity:.85;}
+
+  footer{
+    padding:28px clamp(16px,5vw,48px) 40px;
+    border-top:1px solid var(--line);
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+
+  @media (max-width:640px){
+    nav{display:none;}
+    .row-nav{display:none;}
+    .card{flex:0 0 130px;}
+    .poster{width:130px; height:182px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .slides{transition:none;}
+    .ep-badge .dot, .poster-status .dot{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TONTONAN<span>KU</span></div>
+  <nav>
+    <a href="#donghua">Donghua</a>
+    <a href="#anime">Anime</a>
+  </nav>
+</header>
+
+<!-- ====== HERO BANNER (swipeable) ====== -->
+<section class="hero" id="hero">
+  <div class="slides" id="slides">
+    <!-- slide JS digenerate dari data di bawah -->
+  </div>
+  <button class="hero-arrow prev" id="heroPrev" aria-label="Sebelumnya">&#8249;</button>
+  <button class="hero-arrow next" id="heroNext" aria-label="Berikutnya">&#8250;</button>
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<main>
+  <!-- ====== SEARCH ====== -->
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" type="text" placeholder="Cari judul donghua atau anime...">
+    <button id="searchClear" aria-label="Hapus pencarian">&times;</button>
+  </div>
+
+  <!-- ====== DONGHUA ====== -->
+  <section class="section" id="donghua">
+    <div class="section-head">
+      <div class="section-title donghua"><span class="bar"></span>Donghua</div>
+      <div class="section-sub">sudah ditonton</div>
+    </div>
+    <div class="row-wrap">
+      <button class="row-nav left" data-target="row-donghua" aria-label="Geser kiri">&#8249;</button>
+      <div class="row" id="row-donghua"></div>
+      <button class="row-nav right" data-target="row-donghua" aria-label="Geser kanan">&#8250;</button>
+    </div>
+    <div class="empty-state" id="empty-donghua">Gak ada judul donghua yang cocok.</div>
+  </section>
+
+  <!-- ====== ANIME ====== -->
+  <section class="section" id="anime">
+    <div class="section-head">
+      <div class="section-title anime"><span class="bar"></span>Anime</div>
+      <div class="section-sub">sudah ditonton</div>
+    </div>
+    <div class="row-wrap">
+      <button class="row-nav left" data-target="row-anime" aria-label="Geser kiri">&#8249;</button>
+      <div class="row" id="row-anime"></div>
+      <button class="row-nav right" data-target="row-anime" aria-label="Geser kanan">&#8250;</button>
+    </div>
+    <div class="empty-state" id="empty-anime">Gak ada judul anime yang cocok.</div>
+  </section>
+</main>
+
+<footer>
+  <span>TONTONANKU — List Donghua & Anime Reyy</span>
+  <span id="totalCount"></span>
+</footer>
+
+<!-- ====== DETAIL MODAL ====== -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-sheet" id="detailSheet" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="detail-banner" id="detailBanner">
+      <div class="detail-banner-scrim"></div>
+      <div class="detail-glyph" id="detailGlyph"></div>
+      <button class="detail-back" id="detailClose" aria-label="Tutup">&#8592;</button>
+      <div class="detail-schedule" id="detailSchedule"></div>
+    </div>
+    <div class="detail-body">
+      <h2 class="detail-title" id="detailTitle"></h2>
+      <div class="detail-genres" id="detailGenres"></div>
+      <h3 class="detail-sinopsis-label">Sinopsis</h3>
+      <p class="detail-sinopsis" id="detailSinopsis"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DATA — daftar lengkap yang muncul di section List (bawah).
+   eps: angka episode terakhir ditonton, atau "END" kalau tamat.
+   season: opsional, contoh "S2" (tampil sebelum jumlah episode).
+   poster: opsional — URL foto POTRET (vertikal) buat kartu list.
+           kalau dikosongkan, otomatis pakai placeholder gradient.
+   banner: opsional — URL foto LANDSCAPE (lebar) khusus buat header
+           modal detail saat kartu diklik. SENGAJA dipisah dari
+           poster biar gak ke-crop aneh — jangan isi pakai foto
+           potret yang sama dengan poster.
+   ========================================================= */
+const DATA = {
+  donghua: [
+    { title: "Apotheosis", eps: 129 },
+    { title: "Against The Gods", eps: 43 },
+    { title: "Aishang Ta De Liyou", eps: "END" },
+    { title: "A Record Of A Mortal's Journey to Immortality", eps: 179, poster: "https://i.pinimg.com/736x/8d/24/72/8d2472968be3fd51c4283a4b013659f4.jpg", banner: "https://i.pinimg.com/1200x/4b/c5/9b/4bc59bee201a1f58aa3d33ab606df833.jpg", genres: ["Action","Adventure","Fantasy","Historical","Martial Arts"], releaseDay: "Sabtu", synopsis: "Han Li lahir di keluarga miskin di sebuah desa kecil. Demi membantu keluarganya, ia bergabung dengan sebuah sekte bela diri bernama Qixuanmen. Di sana, ia secara tidak sengaja terlibat dalam dunia kultivasi dan memperoleh sebuah botol hijau misterius yang mampu mempercepat pertumbuhan tanaman obat. Dengan bantuan harta tersebut, Han Li mulai menempuh jalan kultivasi." },
+    { title: "Aliens Among Immortals", eps: 14 },
+    { title: "Azure Legacy", season: "S2", eps: 34 },
+    { title: "Battle Through The Heavens", eps: 204 },
+    { title: "Beyond Time's Gaze", eps: 27 },
+    { title: "Dragon's Triumph in the Celestial Realm", eps: 22 },
+    { title: "Dragon Prince Yuan", eps: 3 },
+    { title: "Divine Manifestation", eps: 12 },
+    { title: "Di Yi Sulit", eps: "END" },
+    { title: "Eclipse Of Illusion", eps: 8 },
+    { title: "Everything Is Fine With The Emperor", eps: "END" },
+    { title: "Everyone In The Sect Expect Me Is An Undercover Agent", eps: 24 },
+    { title: "Ever Night", eps: 7 },
+    { title: "Heavenly Brick Knight", eps: 7 },
+    { title: "Hidden Sect Leader", eps: 24 },
+    { title: "In Search of God's", eps: 11 },
+    { title: "Jade Dynasty", eps: "END" },
+    { title: "Keyboard Immortal", eps: "END" },
+    { title: "Legend Of Martial Immortal", eps: 127 },
+    { title: "LingWu Continent", eps: 159 },
+    { title: "Lost On Journey", eps: 18 },
+    { title: "Martial Master", eps: 667, genres: ["Action","Adventure","Martial Arts"], synopsis: "Berkisah tentang seorang pemuda dari klan kecil yang terlahir dengan kondisi tubuh yang dianggap cacat di dunia yang menjunjung tinggi kekuatan bela diri. Berkat tekad dan metode latihan yang tak biasa, ia berusaha membuktikan dirinya sambil mengungkap rahasia masa lalu klannya dan menghadapi ancaman dari kekuatan-kekuatan besar." },
+    { title: "My Senior Brother Is Too Steady", eps: 66 },
+    { title: "Martial God Asura", season: "S2", eps: 10 },
+    { title: "Martial Peak", eps: "END" },
+    { title: "Over The Divine Kingdom", eps: "END" },
+    { title: "Perfect World", eps: 274 },
+    { title: "Peak Of True Martial Arts", eps: 68 },
+    { title: "Renegade Immortal", eps: 146 },
+    { title: "Shrouding The Heavens", eps: 168, genres: ["Action","Adventure","Fantasy"], synopsis: "Mengikuti kisah seorang pemuda yang terlahir dengan tubuh lemah namun menyimpan takdir besar di tengah dunia kultivasi yang keras. Demi melindungi orang-orang terdekatnya, ia harus melewati berbagai sekte, pertempuran berskala besar, dan ancaman dari kekuatan kuno yang jauh lebih besar dari yang ia bayangkan." },
+    { title: "Soul Land", season: "S2", eps: 153, genres: ["Action","Adventure","Fantasy"], synopsis: "Dunia ini menempatkan kekuatan roh bawaan sebagai penentu status sosial seseorang. Tokoh utama, yang awalnya dipandang rendah karena roh bawaannya dianggap tak berguna, berjuang membuktikan diri lewat kerja keras dan ikatan persahabatan, sambil menghadapi turnamen antar akademi dan ancaman yang lebih besar bagi dunianya." },
+    { title: "Supreme Alchemy", eps: 168 },
+    { title: "Sword Of Coming", season: "S2", eps: "END" },
+    { title: "Stellar Transformation", season: "S1", eps: 9 },
+    { title: "Supreme God Emperor", eps: 197 },
+    { title: "Swallowed Star", eps: 58 },
+    { title: "Sword and Fairy 3", eps: 10 },
+    { title: "Tales of Herding Gods", eps: 88 },
+    { title: "Tales of Demons And Gods", season: "S9", eps: 11 },
+    { title: "Throne of The Sword Master", eps: 35 },
+    { title: "The Legend of Ling Tian", eps: 60 },
+    { title: "Tomb of Fallen Gods", season: "S3", eps: 47 },
+    { title: "The Other Side of Deep Space", eps: 25 },
+    { title: "The Gate of Mystical Realm", eps: "END" },
+    { title: "The Return of The Immortal Emperor", eps: "END" },
+    { title: "The Great Ruler 3D", season: "S2", eps: 26 },
+    { title: "The Rich God", eps: 16 },
+    { title: "The Alchemist's Rise", eps: "END" },
+    { title: "Urban Miracle Doctor", eps: 180 },
+    { title: "Wu Dong Qian Kun", season: "S2", eps: 6 },
+    { title: "Way Of Choices", eps: 23 },
+    { title: "Walking the Way All Alone", eps: 12 },
+    { title: "Yuan Zun", eps: 10 },
+    { title: "Yeosin Gangnim", eps: "END" },
+  ],
+  anime: [
+    { title: "Ao no Exorcist", eps: "END" },
+    { title: "Akame ga Kill", eps: "END" },
+    { title: "Ao no Hako", eps: "END", genres: ["Sports","Romance","Drama"], synopsis: "Kisah ini berfokus pada seorang siswa SMA yang menjadi manajer tim bulu tangkis, sambil menyimpan perasaan terhadap seniornya yang berprestasi. Ketika seorang pelari andal pindah ke sekolah yang sama, hubungan dan ambisi mereka mulai saling memengaruhi dalam balutan kisah olahraga dan romansa remaja." },
+    { title: "Boku no Kokoro no Yabai Yatsu", season: "S2", eps: "END" },
+    { title: "Blue Lock", season: "S2", eps: 1 },
+    { title: "Boku no Hero Academia", season: "S3", eps: 1 },
+    { title: "Black Clover", eps: "END" },
+    { title: "Boushoku no Berserk", eps: "END" },
+    { title: "Botsuraku Yotei no Kizoku dakedo", eps: "END" },
+    { title: "Boruto: Naruto Next Generations", eps: 293 },
+    { title: "Danmachi", eps: "END" },
+    { title: "Date A Live", season: "S5", eps: 3 },
+    { title: "Dekisokonai to Yobarete Motoeiyuu wa Jika Kara Tsuihou Sareta node Sukikatte ni Ikiru Koto ni Shita", eps: 9 },
+    { title: "Fuufu Ijou Koibito Miman.", eps: 10 },
+    { title: "Gotoubun no Hanayome", eps: "END" },
+    { title: "Horimiya Piece", eps: "END" },
+    { title: "High School DXD", eps: "END" },
+    { title: "Haikyuu!!", eps: "END" },
+    { title: "Hige wo Soru. Soshite Joshikousei wo Hirou.", eps: "END" },
+    { title: "Hazurewaku no 'Joutai Ijou Skill' de Saikyou ni Natta Ore ga Subete wo Juurin suru made", eps: 10 },
+    { title: "Hyouken no Majutsushi ga Sekai wo Suberu", eps: "END" },
+    { title: "Hazure skill 'kinomi master': Skill no Mi (Tabetara Shinu) wo Mugen ni Taberareru You ni Natta Ken ni Tsuite", eps: "END" },
+    { title: "Haite Kudasai, Takamine-san", eps: 11 },
+    { title: "Isekai wa Smartphone to Tomo ni.", season: "S2", eps: 8 },
+    { title: "Isekai de Cheat Skill wo Te ni Shita Ore wa, Genjitsu Sekai wo mo Musou Suru: Level Up wa Jinsei wo Kaeta", eps: "END" },
+    { title: "Isekai Shikkaku", eps: "END" },
+    { title: "JidouJodoh Hanbaiki ni Umarekawatta Ore wa Meikyuu wo Sanayou", season: "S2", eps: 1 },
+    { title: "Jujutsu Kaisen", season: "S2", eps: 20, genres: ["Action","Supernatural","Horror"], synopsis: "Berlatar dunia tempat kutukan lahir dari emosi negatif manusia, cerita ini mengikuti seorang siswa yang menelan benda kutukan kelas atas untuk menyelamatkan temannya, lalu bergabung dengan sekolah penyihir kutukan untuk belajar mengendalikan kekuatan barunya sambil menghadapi ancaman yang semakin besar." },
+    { title: "2.5-jigen no Ririsa", eps: 6 },
+    { title: "Kage no Jitsuryokusha ni Naritakute!", eps: "END" },
+    { title: "Kimetsu no Yaiba", eps: "END" },
+    { title: "Kinsou no Vermeil: Gakeppuchi Majutsushi wa Saikyou no Yakusai to Mahou Sekai wo Tsukisusumu", eps: "END" },
+    { title: "Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo", season: "S2", eps: 1 },
+    { title: "Kakkou no Iinazuke", season: "S2", eps: 1 },
+    { title: "Kami wa Game ni Ueteiru", eps: 7 },
+    { title: "Kaifuku Jutsushi no Yarinaoshi", eps: "END" },
+    { title: "Kaijuu 8-gou", eps: "END" },
+    { title: "Kimisen", season: "S2", eps: 10 },
+    { title: "Kaoru Hana wa Rin to Saku", eps: "END" },
+    { title: "Liar Liar", eps: "END" },
+    { title: "Maou Gakuin no Futekigousha: Shijou Saikyou no Maou no Shiho, Tensei shite Shison-tachi no Gakkou e Kayou", eps: "END" },
+    { title: "Mato Seihei no Slave", season: "S2", eps: 6 },
+    { title: "Mahouka Koukou no Rettousei: Raihousha-hen", season: "S3", eps: 8 },
+    { title: "Mf Ghost", eps: "END" },
+    { title: "Masamune-kun no Revenge R", eps: "END" },
+    { title: "Megami no Cafe Terrace", season: "S2", eps: 2 },
+    { title: "Masou Gakuen HxH", eps: "END" },
+    { title: "Mushoku Tensei: Isekai Ittara Honki Dasu", eps: "END" },
+    { title: "Naze Boku no Sekai wo Daremo Oboeteinal no ka?", eps: 8 },
+    { title: "Noumin kanren no skill bakka agetetara nazeka tsuyoku natta", eps: "END" },
+    { title: "Nageki no Bourei wa Intai Shitai", eps: "END" },
+    { title: "One Piece", eps: 1131, genres: ["Action","Adventure","Fantasy","Comedy"], synopsis: "Mengikuti perjalanan seorang pemuda yang bermimpi menjadi raja bajak laut setelah memakan buah iblis yang memberinya kekuatan tubuh karet. Bersama kru yang ia kumpulkan satu per satu, ia berlayar mengarungi lautan penuh bahaya untuk menemukan harta legendaris dan mewujudkan impiannya." },
+    { title: "Ore Dake Level Up na Ken", eps: "END" },
+    { title: "Ore dake Haireru Kakushi Dungeon", eps: "END" },
+    { title: "One Punch Man", season: "S3", eps: 1 },
+    { title: "Osananajimi ga Zettai ni Makenai Love Comedy", eps: "END" },
+    { title: "Otome Game Sekai wa Mob ni Kibishii Sekai desu", eps: "END" },
+    { title: "Otonari no Tenshi-sama ni Itsunomanika Dame Ningen ni Sareteita Ken", season: "S2", eps: 1 },
+    { title: "Party kara Tsuihou sareta Sono Chiyushi, Jitsu wa Saikyou ni Tsuki", eps: "END" },
+    { title: "Re:Monster", eps: 5 },
+    { title: "Re Zero kara Hajimeru Isekai Seikatsu", season: "S2", eps: 18 },
+    { title: "Shangri-La Frontier: Kusoge Hunter, Kamige ni Idoman to su", eps: "END" },
+    { title: "Sekien Gakuin no Makentsukai", eps: "END" },
+    { title: "Sono Bisque Doll wa Koi wo Suru", season: "S2", eps: 1 },
+    { title: "Shijou Saikyou no Daimaou, Murabito A ni Tensei Suru", eps: 8 },
+    { title: "Sword Art Online", eps: "END" },
+    { title: "Seishun Buta Yarou wa Bunny Girl Senpai no Yume wo Minai", eps: "END" },
+    { title: "Shinmai Ossan Boukensha, Saikyou Party ni Shinu hodo Kitaerarete Muteki ni Naru.", eps: "END" },
+    { title: "Sakamoto Days", season: "P2", eps: 1 },
+    { title: "Super no Ura de Yani Suu Futari", eps: 3 },
+    { title: "Tokidoki Bosotto Russia-go de Dareru Tonari no Alya-san", eps: "END" },
+    { title: "Tsuki ga Michibiku Isekai Douchuu", eps: "END" },
+    { title: "Tate no Yuusha no Nariagari", season: "S4", eps: 1 },
+    { title: "Tonikaku Kawaii", season: "S2", eps: 1 },
+    { title: "Tensei Kizoku no Isekai Boukenroku: Jichou wo Shiranai Kamigami no Shito", eps: "END" },
+    { title: "Tensei Kizoku, Kantei Skill de Nariagaru", season: "S1", eps: 6 },
+    { title: "Tensei Shitara Slime Data Ken", season: "S3", eps: 22 },
+    { title: "Tondemo Skill de Isekai Hourou Meshi", season: "S2", eps: 1 },
+    { title: "The New Gate", eps: "END" },
+    { title: "Tsue to Tsurugi no Wistoria", eps: "END" },
+    { title: "Unnamed Memory", eps: 5 },
+    { title: "Wind Breaker", season: "S2", eps: 1 },
+    { title: "White Album 2", eps: "END" },
+    { title: "Yumemiru Danshi wa Genjitsushugisha", eps: "END" },
+    { title: "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e", season: "S4", eps: 2 },
+    { title: "Yamada-kun to 7-nin no Majo", eps: "END" },
+    { title: "Yamada-Kun to Lv999 no Koi Wo Suru", eps: "END" },
+    { title: "Yuusha Party wo Oidasareta Kiyoubinbou", eps: 10 },
+  ]
+};
+
+/* =========================================================
+   HERO_PICKS — daftar TERPISAH khusus buat banner atas.
+   Gak ikut-ikutan sama DATA di atas, jadi banner bisa cuma
+   nampilin judul-judul rekomendasi kamu aja (gak harus semua).
+   Field-nya: title, eps, season (opsional).
+   banner: opsional — URL foto LANDSCAPE (lebar), sama jenisnya
+           kayak banner di modal detail. JANGAN isi pakai poster
+           potret, soalnya kotak hero ini lebar/landscape juga.
+   cat: wajib diisi "donghua" atau "anime" (buat label & warna kicker).
+   ========================================================= */
+const HERO_PICKS = [
+  { cat: "donghua", title: "Shrouding The Heavens", eps: 168 },
+  { cat: "anime", title: "One Piece", eps: 1131 },
+  { cat: "donghua", title: "A Record Of A Mortal's Journey to Immortality", eps: 179, banner: "https://i.pinimg.com/1200x/4b/c5/9b/4bc59bee201a1f58aa3d33ab606df833.jpg" },
+  { cat: "anime", title: "Jujutsu Kaisen", season: "S2", eps: 20 },
+  { cat: "donghua", title: "Soul Land", season: "S2", eps: 153 },
+  { cat: "anime", title: "Ao no Hako", eps: "END" },
+];
+
+function epLabel(item){
+  const seasonPart = item.season ? item.season + " · " : "";
+  if (item.eps === "END") return seasonPart + "Tamat";
+  return seasonPart + "Eps " + item.eps;
+}
+
+function hashTitle(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function buildPoster(item, idx, paletteOffset){
+  const div = document.createElement("div");
+  div.className = "poster pg-" + ((idx + paletteOffset) % 6);
+  // --> Ganti placeholder dengan poster asli:
+  // if (item.poster) div.style.background = `url(${item.poster}) center/cover`;
+  if (item.poster) {
+    div.style.background = `url(${item.poster}) center/cover`;
+  } else {
+    const glyph = document.createElement("div");
+    glyph.className = "poster-glyph";
+    glyph.textContent = item.title.split(" ").map(w => w[0]).join("").slice(0,3);
+    div.appendChild(glyph);
+  }
+  const status = document.createElement("div");
+  status.className = "poster-status" + (item.eps === "END" ? " end" : "");
+  status.innerHTML = '<span class="dot"></span>' + (item.eps === "END" ? "TAMAT" : "ONGOING");
+  div.appendChild(status);
+  return div;
+}
+
+function renderRow(rowId, items, paletteOffset, cat){
+  const row = document.getElementById(rowId);
+  items.forEach((item, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.title = item.title;
+    card.tabIndex = 0;
+    card.appendChild(buildPoster(item, idx, paletteOffset));
+    const title = document.createElement("div");
+    title.className = "card-title";
+    title.textContent = item.title;
+    const eps = document.createElement("div");
+    eps.className = "card-eps";
+    eps.textContent = epLabel(item);
+    card.appendChild(title);
+    card.appendChild(eps);
+    card.addEventListener("click", () => openDetail(item, cat, idx, paletteOffset));
+    card.addEventListener("keydown", e => { if(e.key === "Enter") openDetail(item, cat, idx, paletteOffset); });
+    row.appendChild(card);
+  });
+}
+
+renderRow("row-donghua", DATA.donghua, 0, "donghua");
+renderRow("row-anime", DATA.anime, 3, "anime");
+
+document.getElementById("totalCount").textContent =
+  (DATA.donghua.length + DATA.anime.length) + " judul tersimpan";
+
+/* =========================================================
+   SEARCH — filter card di kedua row secara live.
+   ========================================================= */
+const searchInput = document.getElementById("searchInput");
+const searchClear = document.getElementById("searchClear");
+
+function filterCards(query){
+  const q = query.trim().toLowerCase();
+  searchClear.classList.toggle("show", q.length > 0);
+
+  ["donghua","anime"].forEach(cat => {
+    const row = document.getElementById("row-" + cat);
+    let visible = 0;
+    [...row.children].forEach(card => {
+      const match = card.dataset.title.toLowerCase().includes(q);
+      card.style.display = match ? "" : "none";
+      if (match) visible++;
+    });
+    document.getElementById("empty-" + cat).style.display = (visible === 0 && q !== "") ? "block" : "none";
+    row.style.display = (visible === 0 && q !== "") ? "none" : "flex";
+  });
+}
+searchInput.addEventListener("input", e => filterCards(e.target.value));
+searchClear.addEventListener("click", () => { searchInput.value = ""; filterCards(""); searchInput.focus(); });
+
+/* =========================================================
+   DETAIL MODAL — muncul saat kartu di-klik, isinya genre,
+   sinopsis, judul, dan badge jadwal (ongoing/tamat).
+   Genre & sinopsis: isi field "genres" dan "synopsis" di data
+   item-nya kalau belum ada (lihat contoh di beberapa judul).
+   releaseDay: isi field ini (contoh: "Sabtu") biar badge-nya
+   nampilin "Setiap Sabtu" pas status ongoing.
+   ========================================================= */
+const ICON_CALENDAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+const detailOverlay = document.getElementById("detailOverlay");
+const detailBanner = document.getElementById("detailBanner");
+const detailGlyph = document.getElementById("detailGlyph");
+const detailSchedule = document.getElementById("detailSchedule");
+const detailTitleEl = document.getElementById("detailTitle");
+const detailGenres = document.getElementById("detailGenres");
+const detailSinopsis = document.getElementById("detailSinopsis");
+const detailClose = document.getElementById("detailClose");
+
+function openDetail(item, cat, idx, paletteOffset){
+  // --> Isi gambar banner KHUSUS di sini (beda dari poster di kartu list):
+  // banner idealnya foto landscape/lebar, BUKAN poster portrait,
+  // supaya gak ke-crop aneh pas distretch ke kotak lebar ini.
+  const img = item.banner;
+  if (img) {
+    detailBanner.style.backgroundImage = `url(${img})`;
+    detailBanner.classList.remove("pg-0","pg-1","pg-2","pg-3","pg-4","pg-5");
+    detailGlyph.textContent = "";
+  } else {
+    detailBanner.style.backgroundImage = "none";
+    const paletteClass = "pg-" + (((idx ?? 0) + (paletteOffset ?? 0)) % 6);
+    detailBanner.className = "detail-banner " + paletteClass;
+    detailGlyph.textContent = item.title.split(" ").map(w => w[0]).join("").slice(0,3);
+  }
+
+  const isEnd = item.eps === "END";
+  detailSchedule.className = "detail-schedule " + (isEnd ? "tamat" : "ongoing");
+  detailSchedule.innerHTML = isEnd
+    ? ICON_CHECK + "Tamat"
+    : ICON_CALENDAR + (item.releaseDay ? "Setiap " + item.releaseDay : "Update berkala");
+
+  detailTitleEl.textContent = item.title + (item.season ? " " + item.season : "");
+
+  detailGenres.innerHTML = "";
+  const genres = (item.genres && item.genres.length) ? item.genres : ["Genre belum diisi"];
+  genres.forEach(g => {
+    const chip = document.createElement("span");
+    chip.className = "genre-chip" + (cat === "donghua" ? " donghua" : "");
+    chip.textContent = g;
+    detailGenres.appendChild(chip);
+  });
+
+  detailSinopsis.textContent = item.synopsis ||
+    `Sinopsis "${item.title}" belum ditambahkan. Isi field "synopsis" di data item ini buat nampilin di sini.`;
+
+  detailOverlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeDetail(){
+  detailOverlay.classList.remove("open");
+  document.body.style.overflow = "";
+}
+detailClose.addEventListener("click", closeDetail);
+detailOverlay.addEventListener("click", e => { if (e.target === detailOverlay) closeDetail(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
+
+/* horizontal row scroll buttons */
+document.querySelectorAll(".row-nav").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const row = document.getElementById(btn.dataset.target);
+    const dir = btn.classList.contains("left") ? -1 : 1;
+    row.scrollBy({ left: dir * 360, behavior: "smooth" });
+  });
+});
+
+/* =========================================================
+   HERO BANNER — pakai HERO_PICKS (lihat bagian DATA di atas),
+   jadi cuma judul rekomendasi yang muncul, bisa di-swipe
+   (sentuh/drag) sama seperti carousel doujindesu.
+   ========================================================= */
+const heroItems = HERO_PICKS;
+
+const slidesEl = document.getElementById("slides");
+const dotsEl = document.getElementById("heroDots");
+let current = 0;
+
+heroItems.forEach((item, idx) => {
+  const slide = document.createElement("div");
+  slide.className = "slide pg-" + (idx % 6);
+
+  // --> Isi gambar landscape/lebar di sini lewat field "banner":
+  // if (item.banner) slide.querySelector('.bg').style.backgroundImage = `url(${item.banner})`;
+  const bg = document.createElement("div");
+  bg.className = "bg";
+  if (item.banner) bg.style.backgroundImage = `url(${item.banner})`;
+  slide.appendChild(bg);
+
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  slide.appendChild(scrim);
+
+  const content = document.createElement("div");
+  content.className = "slide-content";
+
+  const kicker = document.createElement("span");
+  kicker.className = "kicker " + (item.cat === "anime" ? "k-anime" : "k-donghua");
+  kicker.textContent = item.cat === "anime" ? "ANIME" : "DONGHUA";
+
+  const title = document.createElement("div");
+  title.className = "slide-title";
+  title.textContent = item.title;
+
+  const meta = document.createElement("div");
+  meta.className = "slide-meta";
+  const badge = document.createElement("span");
+  badge.className = "ep-badge" + (item.eps === "END" ? " end" : "");
+  badge.innerHTML = '<span class="dot"></span>' + epLabel(item);
+  meta.appendChild(badge);
+
+  content.appendChild(kicker);
+  content.appendChild(title);
+  content.appendChild(meta);
+  slide.appendChild(content);
+  slidesEl.appendChild(slide);
+
+  const dot = document.createElement("button");
+  dot.addEventListener("click", () => goTo(idx));
+  dotsEl.appendChild(dot);
+});
+
+function update(){
+  slidesEl.style.transform = `translateX(${-current * 100}%)`;
+  [...dotsEl.children].forEach((d, i) => d.classList.toggle("active", i === current));
+}
+function goTo(i){
+  current = (i + heroItems.length) % heroItems.length;
+  update();
+  restartAutoplay();
+}
+function next(){ goTo(current + 1); }
+function prev(){ goTo(current - 1); }
+
+document.getElementById("heroNext").addEventListener("click", next);
+document.getElementById("heroPrev").addEventListener("click", prev);
+
+let autoplay = setInterval(next, 5000);
+function restartAutoplay(){
+  clearInterval(autoplay);
+  autoplay = setInterval(next, 5000);
+}
+
+/* swipe (touch + mouse drag) */
+const heroEl = document.getElementById("hero");
+let startX = 0, deltaX = 0, dragging = false;
+
+function dragStart(x){ dragging = true; startX = x; clearInterval(autoplay); }
+function dragMove(x){ if(!dragging) return; deltaX = x - startX; }
+function dragEnd(){
+  if(!dragging) return;
+  dragging = false;
+  if (deltaX < -60) next();
+  else if (deltaX > 60) prev();
+  else restartAutoplay();
+  deltaX = 0;
+}
+
+heroEl.addEventListener("touchstart", e => dragStart(e.touches[0].clientX));
+heroEl.addEventListener("touchmove", e => dragMove(e.touches[0].clientX));
+heroEl.addEventListener("touchend", dragEnd);
+
+heroEl.addEventListener("mousedown", e => dragStart(e.clientX));
+heroEl.addEventListener("mousemove", e => dragMove(e.clientX));
+heroEl.addEventListener("mouseup", dragEnd);
+heroEl.addEventListener("mouseleave", () => { if(dragging) dragEnd(); });
+
+update();
+</script>
+</body>
+</html>
